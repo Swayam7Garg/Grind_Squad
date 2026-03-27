@@ -38,6 +38,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
       - run: npm ci
+      - run: npx prisma generate
       - run: npm run lint
       - run: npm run typecheck
 
@@ -49,7 +50,10 @@ jobs:
         working-directory: server
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      JWT_SECRET: test-secret-for-ci
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
       NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
@@ -59,4 +63,5 @@ jobs:
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
       - run: npm ci
+      - run: npx prisma generate
       - run: npm test

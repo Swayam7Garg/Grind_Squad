@@ -57,7 +57,7 @@ enum NotificationType {
 
 model User {
   id          String   @id @default(uuid())
-  clerkId     String   @unique          // Clerk external ID
+  clerkId     String   @unique
   username    String   @unique
   email       String   @unique
   avatarUrl   String?
@@ -92,7 +92,7 @@ model Squad {
   isPublic    Boolean  @default(false)
   avatarUrl   String?
   bannerUrl   String?
-  tags        String[]             // e.g. ["FAANG", "graphs", "placement-2025"]
+  tags        String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -122,12 +122,12 @@ model SquadMember {
 
 model Problem {
   id         String     @id @default(uuid())
-  slug       String     @unique        // normalized identifier e.g. "two-sum"
+  slug       String     @unique
   title      String
   url        String
   difficulty Difficulty
   platform   Platform
-  tags       String[]                  // internal taxonomy tags
+  tags       String[]
   createdAt  DateTime   @default(now())
 
   // Relations
@@ -139,18 +139,17 @@ model Problem {
   @@map("problems")
 }
 
-// Join table: a problem shared inside a specific squad
 model SquadProblem {
-  id        String   @id @default(uuid())
-  note      String?                    // sharer's message e.g. "sneaky edge case!"
-  sharedAt  DateTime @default(now())
+  id         String   @id @default(uuid())
+  note       String?
+  sharedAt   DateTime @default(now())
 
-  problemId String
-  squadId   String
+  problemId  String
+  squadId    String
   sharedById String
-  problem   Problem @relation(fields: [problemId], references: [id])
-  squad     Squad   @relation(fields: [squadId], references: [id], onDelete: Cascade)
-  sharedBy  User    @relation(fields: [sharedById], references: [id])
+  problem    Problem @relation(fields: [problemId], references: [id])
+  squad      Squad   @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  sharedBy   User    @relation(fields: [sharedById], references: [id])
 
   @@unique([problemId, squadId])
   @@map("squad_problems")
@@ -158,8 +157,8 @@ model SquadProblem {
 
 model UserSolve {
   id           String   @id @default(uuid())
-  timeTaken    Int?                     // minutes
-  approachNote String?                  // optional write-up
+  timeTaken    Int?
+  approachNote String?
   solvedAt     DateTime @default(now())
 
   userId    String
@@ -176,7 +175,7 @@ model Duel {
   status     DuelStatus @default(PENDING)
   startedAt  DateTime?
   endedAt    DateTime?
-  timeLimit  Int        @default(60)   // minutes
+  timeLimit  Int        @default(60)
   createdAt  DateTime   @default(now())
 
   challengerId String
@@ -204,12 +203,12 @@ model Discussion {
   userId    String
   problemId String
   squadId   String
-  parentId  String?                    // for nested replies
+  parentId  String?
 
   user      User       @relation(fields: [userId],    references: [id], onDelete: Cascade)
   problem   Problem    @relation(fields: [problemId], references: [id])
   squad     Squad      @relation(fields: [squadId],   references: [id], onDelete: Cascade)
-  parent    Discussion? @relation("Replies", fields: [parentId], references: [id])
+  parent    Discussion?  @relation("Replies", fields: [parentId], references: [id])
   replies   Discussion[] @relation("Replies")
   reactions Reaction[]
 
@@ -218,7 +217,7 @@ model Discussion {
 
 model Reaction {
   id    String @id @default(uuid())
-  emoji String                         // "🧠" | "🔥" | "💀" | "👀"
+  emoji String
 
   userId       String
   discussionId String
@@ -231,10 +230,10 @@ model Reaction {
 
 model Badge {
   id          String @id @default(uuid())
-  key         String @unique            // e.g. "streak_lord", "graph_wizard"
+  key         String @unique
   name        String
   description String
-  icon        String                    // emoji or icon name
+  icon        String
   users       UserBadge[]
 
   @@map("badges")
@@ -256,7 +255,7 @@ model UserBadge {
 model Notification {
   id        String           @id @default(uuid())
   type      NotificationType
-  payload   Json                         // flexible: duel invite, badge earned, etc.
+  payload   Json
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
 
