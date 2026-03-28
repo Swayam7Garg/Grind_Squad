@@ -16,6 +16,7 @@ import leaderboardRoutes from "./routes/leaderboard";
 import { errorHandler } from "./middleware/errorHandler";
 import { registerDuelHandlers } from "./sockets/duelHandler";
 import prisma from "./lib/prisma";
+import { startWeeklyResetJob } from "./jobs/weeklyReset";
 
 // ─────────────────────────────────────────────────────────
 // App bootstrap
@@ -56,7 +57,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/squads", squadRoutes);
-app.use("/api/problems", problemRoutes);
+app.use("/api", problemRoutes);
 app.use("/api/duels", duelRoutes);
 app.use("/api/discussions", discussionRoutes);
 app.use("/api/notifications", notificationRoutes);
@@ -82,6 +83,9 @@ httpServer.listen(PORT, () => {
     console.log(`   Mode:       ${process.env.NODE_ENV ?? "development"}`);
     console.log(`   Client URL: ${process.env.CLIENT_URL ?? "http://localhost:3000"}`);
     console.log(`   Health:     http://localhost:${PORT}/health\n`);
+
+    // Start weekly reset cron job
+    startWeeklyResetJob();
 });
 
 // ─── Graceful shutdown ────────────────────────────────────
