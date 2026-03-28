@@ -1,19 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "../lib/prisma";
 import { AppError } from "../middleware/errorHandler";
-import { slugFromUrl, detectPlatform } from "../utils/slugify";
+import { slugFromUrl, detectPlatform, slugFromTitle, generateUniqueSlug } from "../utils/slugify";
+import { isValidTag } from "../utils/tags";
 import { Difficulty, Platform } from "@prisma/client";
+import { awardPoints } from "../services/points";
+import { addPoints } from "../services/leaderboard";
 
-// ─── List problems ─────────────────────────────────────────
-/**
- * GET /api/problems
- * List problems with optional filters: ?platform=&difficulty=&tag=&search=&page=&limit=
- */
-export async function listProblems(
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> {
+// ─── Global Endpoints ─────────────────────────────────────────
+
+export async function listProblems(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const platform = req.query.platform as Platform | undefined;
         const difficulty = req.query.difficulty as Difficulty | undefined;
@@ -38,12 +34,7 @@ export async function listProblems(
         };
 
         const [problems, total] = await Promise.all([
-            prisma.problem.findMany({
-                where,
-                orderBy: { createdAt: "desc" },
-                skip,
-                take: limit,
-            }),
+            prisma.problem.findMany({ where, orderBy: { createdAt: "desc" }, skip, take: limit }),
             prisma.problem.count({ where }),
         ]);
 
@@ -51,33 +42,13 @@ export async function listProblems(
             data: problems,
             meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
         });
-    } catch (err) {
-        next(err);
-    }
+    } catch (err) { next(err); }
 }
 
-// ─── Create / upsert a problem ────────────────────────────
-/**
- * POST /api/problems
- * Create a new problem (slug-based dedup). Auto-detects platform from URL.
- */
-export async function createProblem(
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> {
+export async function createProblem(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const { url, title, difficulty, platform, tags } = req.body as {
-            url: string;
-            title?: string;
-            difficulty?: Difficulty;
-            platform?: Platform;
-            tags?: string[];
-        };
-
-        if (!url) {
-            throw new AppError("url is required", 400, "VALIDATION_ERROR");
-        }
+        const { url, title, difficulty, platform, tags } = req.body;
+        if (!url) throw new AppError("url is required", 400, "VALIDATION_ERROR");
 
         const slug = slugFromUrl(url);
         const detectedPlatform = platform ?? detectPlatform(url);
@@ -85,207 +56,219 @@ export async function createProblem(
         const problem = await prisma.problem.upsert({
             where: { slug },
             create: {
-                slug,
-                title: title ?? slug,
-                url,
-                difficulty: difficulty ?? "MEDIUM",
-                platform: detectedPlatform,
-                tags: tags ?? [],
+                slug, title: title ?? slug, url,
+                difficulty: difficulty ?? "MEDIUM", platform: detectedPlatform, tags: tags ?? [],
             },
             update: {
-                // Update title/tags if provided, keep existing otherwise
                 ...(title ? { title } : {}),
                 ...(tags ? { tags } : {}),
             },
         });
 
-        res.status(201).json({
-            data: problem,
-            message: "Problem created/updated successfully",
-        });
-    } catch (err) {
-        next(err);
-    }
+        res.status(201).json({ data: problem, message: "Problem created/updated successfully" });
+    } catch (err) { next(err); }
 }
 
-// ─── Get a single problem ─────────────────────────────────
-/**
- * GET /api/problems/:problemId
- * Get a single problem with solve count and squad-specific discussion count.
- */
-export async function getProblemById(
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> {
+export async function getProblemById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const { problemId } = req.params;
-
         const problem = await prisma.problem.findUnique({
             where: { id: problemId },
-            include: {
-                _count: {
-                    select: { solves: true, discussions: true, duels: true },
-                },
-            },
+            include: { _count: { select: { solves: true, discussions: true, duels: true } } },
         });
 
-        if (!problem) {
-            throw new AppError("Problem not found", 404, "NOT_FOUND");
-        }
-
+        if (!problem) throw new AppError("Problem not found", 404, "NOT_FOUND");
         res.status(200).json({ data: problem });
-    } catch (err) {
-        next(err);
-    }
+    } catch (err) { next(err); }
 }
 
-// ─── Share problem to a squad ─────────────────────────────
-/**
- * POST /api/problems/share
- * Share an existing problem to a squad with an optional note.
- */
-export async function shareProblem(
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> {
+// ─── Squad-Specific Endpoints ─────────────────────────────────
+
+export async function shareProblem(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const { userId } = req.user;
-        const { problemId, squadId, note } = req.body as {
-            problemId: string;
-            squadId: string;
-            note?: string;
-        };
+        const { squadId } = req.params;
+        let { url, title, difficulty, tags, note, slug } = req.body;
 
-        if (!problemId || !squadId) {
-            throw new AppError("problemId and squadId are required", 400, "VALIDATION_ERROR");
+        if (!url || !title || !difficulty) {
+            throw new AppError("url, title, and difficulty are required", 400, "VALIDATION_ERROR");
         }
 
-        // Verify caller is a member of the squad
-        const membership = await prisma.squadMember.findUnique({
-            where: { userId_squadId: { userId, squadId } },
-        });
+        if (!tags || !Array.isArray(tags) || tags.length > 5) {
+            throw new AppError("tags array is required (max 5)", 400, "VALIDATION_ERROR");
+        }
 
-        if (!membership) {
-            throw new AppError("You are not a member of this squad", 403, "NOT_A_MEMBER");
+        for (const tag of tags) {
+            if (!isValidTag(tag)) throw new AppError(`Invalid tag: ${tag}`, 400, "VALIDATION_ERROR");
+        }
+
+        const platform = detectPlatform(url);
+        
+        let targetSlug = slug;
+        if (!targetSlug) {
+            targetSlug = slugFromTitle(title);
+        }
+
+        // Try find existing problem by slug
+        let problem = await prisma.problem.findUnique({ where: { slug: targetSlug } });
+
+        if (problem && problem.url !== url) {
+            // Slug collision but different URL -> append suffix
+            targetSlug = await generateUniqueSlug(targetSlug);
+            problem = null;
+        }
+
+        if (!problem) {
+            problem = await prisma.problem.create({
+                data: {
+                    slug: targetSlug, title, url, difficulty, platform, tags
+                }
+            });
         }
 
         const squadProblem = await prisma.squadProblem.upsert({
-            where: { problemId_squadId: { problemId, squadId } },
+            where: { problemId_squadId: { problemId: problem.id, squadId } },
             create: {
-                problemId,
+                problemId: problem.id,
                 squadId,
                 sharedById: userId,
                 note: note ?? null,
             },
-            update: {}, // already shared — no-op
+            update: {}, // no-op if exists
             include: {
-                problem: true,
                 sharedBy: { select: { id: true, username: true, avatarUrl: true } },
             },
         });
 
-        res.status(201).json({
-            data: squadProblem,
-            message: "Problem shared to squad",
-        });
-    } catch (err) {
-        next(err);
-    }
+        // Notify other squad members
+        const members = await prisma.squadMember.findMany({ where: { squadId, userId: { not: userId } } });
+        
+        if (members.length > 0) {
+            await prisma.notification.createMany({
+                data: members.map(m => ({
+                    userId: m.userId,
+                    type: "PROBLEM_SHARED",
+                    payload: {
+                        squadId,
+                        problemId: problem!.id,
+                        sharedById: userId,
+                        title: problem!.title
+                    }
+                }))
+            });
+        }
+
+        res.status(201).json({ data: { problem, squadProblem } });
+    } catch (err) { next(err); }
 }
 
-// ─── Mark a problem as solved ─────────────────────────────
-/**
- * POST /api/problems/solve
- * Mark a problem as solved by the authenticated user.
- */
-export async function markSolved(
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> {
+export async function getSquadProblems(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const { userId } = req.user;
-        const { problemId, timeTaken, approachNote } = req.body as {
-            problemId: string;
-            timeTaken?: number;
-            approachNote?: string;
-        };
+        const { squadId } = req.params;
+        const tag = req.query.tag as string;
+        const difficulty = req.query.difficulty as Difficulty;
+        const page = Math.max(1, parseInt(req.query.page as string) || 1);
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 20));
+        const solvedParam = req.query.solved as string | undefined;
 
-        if (!problemId) {
-            throw new AppError("problemId is required", 400, "VALIDATION_ERROR");
+        let solvedFilter: boolean | undefined = undefined;
+        if (solvedParam === "true") solvedFilter = true;
+        if (solvedParam === "false") solvedFilter = false;
+
+        const skip = (page - 1) * limit;
+
+        const squadProblemsList = await prisma.squadProblem.findMany({
+            where: {
+                squadId,
+                problem: {
+                    ...(difficulty ? { difficulty } : {}),
+                    ...(tag ? { tags: { has: tag } } : {}),
+                }
+            },
+            include: {
+                problem: {
+                    include: { solves: { include: { user: { select: { id: true, username: true, avatarUrl: true } } } } }
+                },
+                sharedBy: { select: { id: true, username: true, avatarUrl: true } },
+            },
+            orderBy: { sharedAt: "desc" },
+        });
+
+        const formatted = squadProblemsList.map(sp => {
+            const solvedBy = sp.problem.solves.map(s => s.user);
+            const isSolvedByMe = solvedBy.some(u => u.id === userId);
+            return {
+                ...sp.problem,
+                solves: undefined, // remove raw solves
+                squadProblem: {
+                    id: sp.id, note: sp.note, sharedAt: sp.sharedAt, sharedBy: sp.sharedBy
+                },
+                solvedBy,
+                isSolvedByMe
+            };
+        });
+
+        let filtered = formatted;
+        if (solvedFilter !== undefined) {
+            filtered = formatted.filter(p => p.isSolvedByMe === solvedFilter);
         }
 
-        // Check problem exists
-        const problem = await prisma.problem.findUnique({ where: { id: problemId } });
-        if (!problem) {
-            throw new AppError("Problem not found", 404, "NOT_FOUND");
+        const paginated = filtered.slice(skip, skip + limit);
+
+        res.status(200).json({ data: paginated });
+    } catch (err) { next(err); }
+}
+
+export async function markSolved(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const { userId } = req.user;
+        const { squadId, problemId } = req.params;
+        const { timeTaken, approachNote } = req.body;
+
+        const existingSolve = await prisma.userSolve.findUnique({
+            where: { userId_problemId: { userId, problemId } }
+        });
+
+        if (existingSolve) {
+            throw new AppError("Already marked as solved", 400, "ALREADY_SOLVED");
         }
 
-        // Upsert the solve record
-        const solve = await prisma.userSolve.upsert({
-            where: { userId_problemId: { userId, problemId } },
-            create: {
+        await prisma.userSolve.create({
+            data: {
                 userId,
                 problemId,
                 timeTaken: timeTaken ?? null,
                 approachNote: approachNote ?? null,
-            },
-            update: {
-                timeTaken: timeTaken ?? undefined,
-                approachNote: approachNote ?? undefined,
-                solvedAt: new Date(),
-            },
+            }
         });
 
-        // Update streak + points on user
-        const now = new Date();
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        // Find all squads the user is a member of where this problem has been shared.
+        const userSquads = await prisma.squadMember.findMany({
+            where: { userId }, select: { squadId: true }
+        });
+        const userSquadIds = userSquads.map(us => us.squadId);
 
-        if (user) {
-            const lastSolved = user.lastSolvedAt;
-            let newStreak = 1;
+        const sharedInSquads = await prisma.squadProblem.findMany({
+            where: { problemId, squadId: { in: userSquadIds } },
+            select: { squadId: true }
+        });
+        const awardSquadIds = sharedInSquads.map(sp => sp.squadId);
 
-            if (lastSolved) {
-                const diffHours =
-                    (now.getTime() - lastSolved.getTime()) / (1000 * 60 * 60);
-                if (diffHours < 48) {
-                    // Consecutive day — increment streak
-                    newStreak = user.streak + 1;
-                }
-                // If > 48h, streak resets to 1
-            }
+        const { pointsEarned, newStreak } = await awardPoints(userId, problemId, awardSquadIds);
 
-            // Points: Easy = 10, Medium = 20, Hard = 40
-            const pointsMap: Record<string, number> = { EASY: 10, MEDIUM: 20, HARD: 40 };
-            const earnedPoints = pointsMap[problem.difficulty] ?? 20;
+        const updatedUser = await prisma.user.findUnique({ where: { id: userId }, select: { totalPoints: true } });
 
-            // Streak bonus: +5 per streak day (capped at 50)
-            const streakBonus = Math.min(newStreak * 5, 50);
-
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    streak: newStreak,
-                    maxStreak: Math.max(newStreak, user.maxStreak),
-                    totalPoints: { increment: earnedPoints + streakBonus },
-                    lastSolvedAt: now,
-                },
-            });
-
-            // Also increment points on all squad memberships
-            await prisma.squadMember.updateMany({
-                where: { userId },
-                data: { points: { increment: earnedPoints + streakBonus } },
-            });
+        for (const sid of awardSquadIds) {
+            await addPoints(userId, sid, pointsEarned);
         }
 
         res.status(200).json({
-            data: solve,
-            message: "Problem marked as solved",
+            data: {
+                pointsEarned,
+                newStreak,
+                totalPoints: updatedUser?.totalPoints ?? 0
+            }
         });
-    } catch (err) {
-        next(err);
-    }
+    } catch (err) { next(err); }
 }

@@ -1,10 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { createClerkClient } from "@clerk/backend";
+import { verifyToken } from "@clerk/backend";
 import prisma from "../lib/prisma";
-
-const clerkClient = createClerkClient({
-    secretKey: process.env.CLERK_SECRET_KEY,
-});
 
 /**
  * Clerk JWT verification middleware.
@@ -34,7 +30,9 @@ export async function requireAuth(
         const token = authHeader.slice(7); // strip "Bearer "
 
         // Verify the JWT using Clerk's backend SDK
-        const payload = await clerkClient.verifyToken(token);
+        const payload = await verifyToken(token, {
+            secretKey: process.env.CLERK_SECRET_KEY,
+        });
 
         if (!payload || !payload.sub) {
             res.status(401).json({

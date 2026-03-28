@@ -1,3 +1,5 @@
+import prisma from "../lib/prisma";
+
 /**
  * Extracts a normalized slug from a problem URL.
  * Works for LeetCode, GFG, and Codeforces.
@@ -33,6 +35,31 @@ export function slugFromUrl(url: string): string {
     } catch {
         return `unknown-${Date.now()}`;
     }
+}
+
+/**
+ * Generates a base slug from a problem title.
+ */
+export function slugFromTitle(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-") // replace non-alphanumeric with hyphen
+        .replace(/^-|-$/g, "");      // trim hyphens
+}
+
+/**
+ * Ensures slug is unique in the DB.
+ */
+export async function generateUniqueSlug(baseSlug: string): Promise<string> {
+    const existing = await prisma.problem.findUnique({
+        where: { slug: baseSlug }
+    });
+
+    if (!existing) return baseSlug;
+
+    // Append a 4-char suffix if taken
+    const suffix = Math.random().toString(36).substring(2, 6);
+    return `${baseSlug}-${suffix}`;
 }
 
 /**
