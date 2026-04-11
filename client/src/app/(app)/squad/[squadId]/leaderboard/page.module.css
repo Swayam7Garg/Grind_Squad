@@ -1,0 +1,105 @@
+.page { flex: 1; display: flex; flex-direction: column; min-height: calc(100vh - 52px); }
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid rgba(72,72,73,0.15);
+  flex-wrap: wrap; gap: 1rem;
+}
+.headerLeft { display: flex; align-items: center; gap: 1rem; }
+.backBtn {
+  color: var(--on-surface-variant); padding: 0.3rem;
+  border-radius: var(--radius-md); transition: var(--transition);
+  display: flex; align-items: center;
+}
+.backBtn:hover { color: var(--on-surface); background: var(--surface-container); }
+.title { font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 1.4rem; }
+
+.periods { display: flex; gap: 0.4rem; }
+.periodBtn {
+  font-size: 0.75rem; font-weight: 600; padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-sm); color: var(--on-surface-variant);
+  border: 1px solid transparent; transition: var(--transition);
+  font-family: var(--font-body); letter-spacing: 0.04em;
+}
+.periodBtn:hover { border-color: var(--outline); color: var(--on-surface); }
+.periodActive { border-color: var(--neon) !important; color: var(--neon) !important; background: var(--neon-dim); }
+
+.loadingRows { padding: 1.5rem 2rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.75rem; color: var(--on-surface-variant); font-size: 0.875rem;
+}
+
+.content { flex: 1; padding: 2rem; overflow-y: auto; }
+
+/* ── Podium ── */
+.podium {
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: 1.25rem; margin-bottom: 3rem; flex-wrap: wrap;
+}
+.podiumCard {
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+  background: var(--surface-container); border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem; min-width: 130px; text-align: center;
+  position: relative; overflow: hidden;
+  border-top: 1px solid rgba(72,72,73,0.2);
+  transition: var(--transition-slow);
+}
+.podiumFirst {
+  background: var(--surface-container-high);
+  border-top-color: rgba(0,255,156,0.25) !important;
+  transform: translateY(-10px);
+  box-shadow: 0 0 40px rgba(0,255,156,0.08);
+}
+.podiumMedal { font-size: 1.75rem; }
+.podiumAvatar {
+  position: relative;
+  width: 56px; height: 56px; border-radius: var(--radius-md);
+  background: var(--surface-container-highest);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 1rem;
+  color: var(--neon); margin-bottom: 0.25rem;
+}
+.podiumGlow {
+  position: absolute; inset: 0; border-radius: inherit;
+  box-shadow: 0 0 20px rgba(0,255,156,0.3); pointer-events: none;
+}
+.podiumName { font-weight: 600; font-size: 0.9rem; }
+.podiumPts { font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 1.5rem; color: var(--neon); }
+.podiumStreak {
+  display: flex; align-items: center; gap: 0.2rem;
+  font-size: 0.72rem; color: var(--secondary); font-weight: 600;
+}
+
+/* ── Rank List ── */
+.rankList { display: flex; flex-direction: column; gap: 0.5rem; }
+.rankRow {
+  display: flex; align-items: center; gap: 0.9rem;
+  background: var(--surface-container); border-radius: var(--radius-lg); padding: 0.875rem 1rem;
+  transition: var(--transition);
+}
+.rankRow:hover { background: var(--surface-container-high); }
+.rankNum {
+  font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 0.85rem;
+  color: var(--on-surface-variant); min-width: 32px;
+}
+.rankAvatar {
+  width: 34px; height: 34px; border-radius: var(--radius-md);
+  background: var(--surface-container-highest);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 0.7rem;
+  color: var(--on-surface-variant); flex-shrink: 0;
+}
+.rankName { flex: 1; font-weight: 600; font-size: 0.875rem; }
+.rankStreak {
+  display: flex; align-items: center; gap: 0.2rem;
+  font-size: 0.75rem; color: var(--secondary); font-weight: 600;
+}
+.rankPts { font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--neon); }
+
+@media (max-width: 640px) {
+  .header { padding: 1rem; }
+  .content { padding: 1rem; }
+  .podiumCard { min-width: 100px; padding: 1rem; }
+}

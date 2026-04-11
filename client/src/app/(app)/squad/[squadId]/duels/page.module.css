@@ -1,0 +1,207 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.titleGlow {
+  color: #ff3c3c;
+  text-shadow: 0 0 15px rgba(255, 60, 60, 0.3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.duelCard {
+  background: var(--surface-container);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.duelCard:hover {
+  border-color: rgba(255, 60, 60, 0.3);
+}
+
+.duelCard.active {
+  border-color: rgba(0, 255, 136, 0.4);
+}
+
+.duelHeader {
+  padding: 1rem 1.25rem;
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.problemTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.badgePending { background: rgba(255, 180, 0, 0.1); color: #ffb400; border: 1px solid rgba(255,180,0,0.3); }
+.badgeActive { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); border: 1px solid rgba(0,255,136,0.3); }
+.badgeCompleted { background: rgba(100, 100, 255, 0.1); color: #6464ff; border: 1px solid rgba(100,100,255,0.3); }
+.badgeCancelled { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); }
+
+.duelBody {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.versus {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 40%;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--surface-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.winner .avatar {
+  box-shadow: 0 0 0 2px var(--neon-green), 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+.loser .avatar {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.username {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.duelFooter {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.2);
+}
+
+.timeInfo {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.actionBtn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.actionBtnPrimary {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+.actionBtnPrimary:hover {
+  background: rgba(0, 255, 136, 0.2);
+}
+
+.actionBtnDanger {
+  background: rgba(255, 60, 60, 0.1);
+  border-color: #ff3c3c;
+  color: #ff3c3c;
+}
+
+.actionBtnDanger:hover {
+  background: rgba(255, 60, 60, 0.2);
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+  background: var(--surface-container);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+}

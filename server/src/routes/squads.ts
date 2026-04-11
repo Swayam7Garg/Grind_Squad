@@ -7,6 +7,9 @@ import {
     joinSquad,
     listPublicSquads,
     leaveSquad,
+    deleteSquad,
+    addMember,
+    removeMember,
 } from "../controllers/squads.controller";
 
 const router = Router();
@@ -28,5 +31,14 @@ router.get("/:squadId", squadGuard, getSquad);
 
 /** DELETE /api/squads/:squadId/leave — leave squad (member only) */
 router.delete("/:squadId/leave", squadGuard, leaveSquad);
+
+/** DELETE /api/squads/:squadId — delete squad (owner only) */
+router.delete("/:squadId", squadGuard, deleteSquad);
+
+/** POST /api/squads/:squadId/members — add member (owner/admin only) */
+router.post("/:squadId/members", squadGuard, addMember);
+
+/** DELETE /api/squads/:squadId/members/:memberUserId — remove member (owner/admin only) */
+router.delete("/:squadId/members/:memberUserId", squadGuard, removeMember);
 
 export default router;

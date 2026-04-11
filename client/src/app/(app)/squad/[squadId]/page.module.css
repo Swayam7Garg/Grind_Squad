@@ -1,0 +1,263 @@
+.page {
+  flex: 1; display: flex; flex-direction: column;
+  min-height: calc(100vh - 52px); overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid rgba(72,72,73,0.15);
+  gap: 1rem; flex-wrap: wrap;
+}
+.headerLeft { display: flex; align-items: center; gap: 1rem; }
+.backBtn {
+  color: var(--on-surface-variant); padding: 0.3rem;
+  border-radius: var(--radius-md); transition: var(--transition);
+  display: flex; align-items: center;
+}
+.backBtn:hover { color: var(--on-surface); background: var(--surface-container); }
+.squadName { font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 1.4rem; }
+.headerRight { display: flex; align-items: center; gap: 0.65rem; }
+
+/* ── Filters ── */
+.filters {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  border-bottom: 1px solid rgba(72,72,73,0.1);
+}
+.filterBtn {
+  font-size: 0.75rem; font-weight: 500; padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm); color: var(--on-surface-variant);
+  border: 1px solid transparent; transition: var(--transition);
+  font-family: var(--font-body);
+}
+.filterBtn:hover { color: var(--on-surface); background: var(--surface-container); }
+.filterActive { border-color: var(--neon) !important; color: var(--neon) !important; background: var(--neon-dim); }
+
+/* ── Feed ── */
+.feed {
+  flex: 1; overflow-y: auto;
+  padding: 1.25rem 2rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+
+/* ── Problem Card ── */
+.problemCard {
+  position: relative; overflow: hidden;
+  background: var(--surface-container); border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem; transition: var(--transition-slow);
+}
+.problemCard::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,156,0.06), transparent);
+}
+.problemCard:hover { background: var(--surface-container-high); }
+.solved { opacity: 0.75; }
+.solvedBar {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--neon);
+}
+
+.cardTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem; }
+.cardMeta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.cardActions { display: flex; align-items: center; gap: 0.4rem; }
+
+.cardTitle { margin-bottom: 0.4rem; }
+.titleLink {
+  font-family: 'Space Grotesk',sans-serif; font-weight: 700; font-size: 1rem;
+  color: var(--on-surface); transition: var(--transition);
+}
+.titleLink:hover { color: var(--neon); }
+
+.note {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.78rem; font-style: italic; color: var(--on-surface-variant);
+  margin-bottom: 0.5rem; padding: 0.35rem 0.5rem;
+  background: var(--surface-container-high); border-radius: var(--radius-sm);
+}
+
+.cardFooter { display: flex; align-items: center; justify-content: space-between; margin-top: 0.6rem; flex-wrap: wrap; gap: 0.5rem; }
+.solvedBy { display: flex; align-items: center; gap: 0.25rem; }
+.avatar {
+  width: 22px; height: 22px; border-radius: var(--radius-sm);
+  background: var(--surface-container-highest); font-size: 0.55rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; color: var(--neon);
+  margin-right: -6px; border: 1px solid var(--surface-container);
+}
+.solvedByText { font-size: 0.72rem; color: var(--on-surface-variant); margin-left: 10px; }
+.sharedBy { display: flex; align-items: center; gap: 0.35rem; }
+.sharedByName { font-size: 0.75rem; font-weight: 600; color: var(--neon); }
+.solvedBtn {
+  display: flex; align-items: center; gap: 0.3rem;
+  font-size: 0.72rem; padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm); color: var(--neon);
+  background: var(--neon-dim); font-family: var(--font-body); font-weight: 600;
+  border: 1px solid rgba(0,255,156,0.3); cursor: default;
+}
+
+/* ── Empty state ── */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.75rem; flex: 1; text-align: center; padding: 4rem 2rem;
+  color: var(--on-surface-variant); font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .header { padding: 1rem; }
+  .feed { padding: 1rem; }
+  .filters { padding: 0.75rem 1rem; }
+}
+
+/* ── Invite code banner ── */
+.inviteBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 2rem;
+  background: rgba(0,255,156,0.04);
+  border-bottom: 1px solid rgba(0,255,156,0.1);
+  flex-wrap: wrap;
+}
+
+.inviteLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+.inviteCode {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--neon);
+  background: rgba(0,255,156,0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(0,255,156,0.2);
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  color: var(--on-surface-variant);
+  border: 1px solid transparent;
+  transition: var(--transition);
+  font-family: var(--font-body);
+}
+/* ── Custom Modal Styles for Share Mission ── */
+.modalBackdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(14, 14, 15, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 200ms ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: var(--surface-container-high);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  animation: slideUp 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.closeButton {
+  font-size: 1.5rem;
+  color: var(--on-surface-variant);
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+}
+.closeButton:hover { color: var(--on-surface); }
+
+.modalBody {
+  padding: var(--space-6);
+}
+
+.formGroup {
+  margin-bottom: var(--space-5);
+  display: flex;
+  flex-direction: column;
+}
+
+.diffSelectBtn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--outline-variant);
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--on-surface-variant);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.diffActiveEASY { background: rgba(0,255,156,0.1); border-color: var(--neon); color: var(--neon); }
+.diffActiveMEDIUM { background: rgba(254,183,0,0.1); border-color: var(--secondary); color: var(--secondary); }
+.diffActiveHARD { background: rgba(255,114,87,0.1); border-color: var(--tertiary); color: var(--tertiary); }
+
+.tagPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--surface-variant);
+  border: 1px solid var(--outline-variant);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-family: monospace;
+  color: var(--on-surface);
+}
+.tagPill button {
+  color: var(--on-surface-variant);
+  font-size: 0.8rem;
+  line-height: 1;
+  margin-left: 2px;
+}
+.tagPill button:hover { color: var(--error); }
+
+.errorBox {
+  background: rgba(255,113,108,0.1);
+  border: 1px solid var(--error);
+  color: var(--error);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+  font-size: 0.8rem;
+}

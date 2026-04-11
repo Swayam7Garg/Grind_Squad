@@ -92,6 +92,7 @@ model Squad {
   isPublic    Boolean  @default(false)
   avatarUrl   String?
   bannerUrl   String?
+  memberLimit Int      @default(20)
   tags        String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

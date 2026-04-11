@@ -1,148 +1,174 @@
-# 🧠 GrindSquad
+# ⚔️ GrindSquad
 
-> **DSA prep, but make it social.** GrindSquad is a squad-based platform where friend groups crush DSA problems together — share problems from LeetCode/GFG/Codeforces, compete on leaderboards, duel each other 1v1, and track your weaknesses before placement season hits.
+**Competitive LeetCode grinding — with your squad.**
+
+GrindSquad is a full-stack squad management and competitive coding platform where teams share problems, track streaks, challenge each other to 1v1 code duels, and compete on leaderboards.
+
+---
+
+## 🚀 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 14 (App Router), TypeScript, CSS Modules |
+| Backend | Node.js, Express, TypeScript |
+| Database | PostgreSQL via Supabase, Prisma ORM |
+| Auth | Clerk |
+| Realtime | Socket.IO |
+| Hosting (API) | Render |
+| Hosting (Client) | Vercel |
 
 ---
 
 ## ✨ Features
 
-- 🔗 **Problem Sharing** — Paste any LeetCode / GFG / Codeforces link. Problem card auto-populates with title, difficulty, and tags.
-- 👥 **Squads** — Create private invite-only groups or join public ones. Your crew, your leaderboard.
-- 🏆 **Live Leaderboard** — Points for solving, streak bonuses, difficulty multipliers. Rankings update in real time.
-- ⚔️ **1v1 Duels** — Challenge a squadmate to the same problem. First to mark solved wins.
-- 💬 **Discussion Threads** — Share approaches, drop spoiler-hidden hints, react with custom emojis.
-- 📊 **Weakness Analytics** — Radar chart of your topic coverage. See exactly where you're falling behind.
-- 🔥 **Streaks** — Daily solve streaks with animated flames. Don't break the chain.
+- **Squad System** — Create or join squads with invite codes; owner can delete squad
+- **Mission Feed** — Share LeetCode / GFG / Codeforces problems to your squad feed
+- **Solve Tracking** — Mark problems as solved, earn points and maintain streaks
+- **1v1 Duel Arena** — Challenge squadmates to timed head-to-head coding battles
+- **Leaderboard** — Weekly and all-time squad + global rankings
+- **Member Management** — Owners/Admins can search any user by username and add/remove them
+- **Explore** — Browse the full problem library or search operatives by username
+- **Notifications** — Real-time activity feed
 
 ---
 
-## 🛠️ Tech Stack
-
-| Layer | Tech |
-|---|---|
-| Frontend | Next.js 14, TypeScript, Tailwind CSS, Framer Motion |
-| Backend | Node.js, Express, Prisma ORM |
-| Database | PostgreSQL via Supabase |
-| Cache / Leaderboard | Redis via Upstash |
-| Auth | Clerk |
-| Realtime | Socket.io |
-| Frontend Deploy | Vercel |
-| Backend Deploy | Railway |
-| Email | Resend |
-
----
-
-## 📁 Project Structure
+## 🗂️ Project Structure
 
 ```
-grindsquad/
-├── client/          # Next.js 14 frontend
-├── server/          # Node.js + Express backend
-├── .github/         # CI/CD workflows
-└── README.md
+Grind_Squad/
+├── client/          # Next.js frontend
+│   ├── src/
+│   │   ├── app/     # Route pages (App Router)
+│   │   ├── components/
+│   │   └── lib/     # API client, types, utilities
+│   └── .env.example
+├── server/          # Express backend
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   └── services/
+│   ├── prisma/
+│   │   └── schema.prisma
+│   └── .env.example
+└── .gitignore
 ```
 
 ---
 
-## 🚀 Getting Started
+## ⚙️ Local Development
 
 ### Prerequisites
-- Node.js 20+
-- PostgreSQL (or a Supabase account)
-- Redis (or an Upstash account)
-- A Clerk account for auth
+- Node.js ≥ 20
+- PostgreSQL database (or Supabase project)
+- Clerk account
 
 ### 1. Clone the repo
+
 ```bash
-git clone https://github.com/YOUR_ORG/grindsquad.git
-cd grindsquad
+git clone https://github.com/Swayam7Garg/Grind_Squad.git
+cd Grind_Squad
 ```
 
-### 2. Setup the backend
+### 2. Setup Server
+
 ```bash
 cd server
-cp .env.example .env       # fill in your secrets
+cp .env.example .env
+# Fill in .env with your DATABASE_URL and CLERK_SECRET_KEY
 npm install
-npx prisma migrate dev     # run DB migrations
-npm run dev                # starts on port 4000
+npx prisma generate
+npx prisma migrate dev
+npm run dev
+# Server runs at http://localhost:4000
 ```
 
-### 3. Setup the frontend
+### 3. Setup Client
+
 ```bash
 cd client
-cp .env.example .env.local  # fill in your secrets
+cp .env.example .env.local
+# Fill in .env.local with your Clerk keys and NEXT_PUBLIC_API_URL
 npm install
-npm run dev                 # starts on port 3000
+npm run dev
+# Client runs at http://localhost:3000
 ```
+
+---
+
+## 🌐 Deployment
+
+### Server → Render
+
+1. Create a Web Service on [Render](https://render.com)
+2. Set **Build Command**: `npm install && npx prisma generate && npm run build`
+3. Set **Start Command**: `npm start`
+4. Add all environment variables from `server/.env.example`
+
+### Client → Vercel
+
+1. Import the `client/` directory into [Vercel](https://vercel.com)
+2. Set the **Root Directory** to `client`
+3. Add all environment variables from `client/.env.example`
+4. Set `NEXT_PUBLIC_API_URL` to your Render backend URL
+
+---
+
+## 📜 API Overview
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/squads` | Create a squad |
+| `GET` | `/api/squads/:id` | Get squad details |
+| `DELETE` | `/api/squads/:id` | Delete squad (OWNER only) |
+| `POST` | `/api/squads/:id/members` | Add member (OWNER/ADMIN) |
+| `DELETE` | `/api/squads/:id/members/:uid` | Remove member (OWNER/ADMIN) |
+| `GET` | `/api/users/search?q=` | Search users by username |
+| `GET` | `/api/problems` | List / search problems |
+| `POST` | `/api/duels` | Create a 1v1 duel |
+| `GET` | `/api/leaderboard/global` | Global leaderboard |
 
 ---
 
 ## 🔐 Environment Variables
 
-### `server/.env`
-```env
-DATABASE_URL=             # Supabase PostgreSQL connection string
-DIRECT_URL=               # Supabase direct URL (for migrations)
-REDIS_URL=                # Upstash Redis URL
-REDIS_TOKEN=              # Upstash Redis token
-CLERK_SECRET_KEY=         # From Clerk dashboard
-JWT_SECRET=               # Random secret for JWT signing
-PORT=4000
-CLIENT_URL=http://localhost:3000
-```
+Copy `.env.example` files and **never commit** real `.env` files.
 
-### `client/.env.local`
-```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=   # From Clerk dashboard
-CLERK_SECRET_KEY=                    # From Clerk dashboard
-NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
-```
+See [`server/.env.example`](server/.env.example) and [`client/.env.example`](client/.env.example) for required variables.
 
 ---
 
-## 🌿 Git Workflow
+## 🛠️ Scripts
 
-```
-main          ← production only. Never commit directly.
-  └── dev     ← integration branch. Merge features here.
-        ├── feat/auth
-        ├── feat/squad-creation
-        ├── feat/problem-feed
-        └── feat/duels
-```
+### Server
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start dev server with hot-reload |
+| `npm run build` | Compile TypeScript |
+| `npm start` | Run compiled production server |
+| `npm run prisma:migrate` | Run DB migrations |
+| `npm run prisma:studio` | Open Prisma Studio |
 
-**Commit convention:** `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`
-
-**PR rule:** No PR sits unreviewed for more than 24 hours.
-
----
-
-## 🗺️ Roadmap
-
-- [x] Repo setup
-- [ ] Auth + user profiles
-- [ ] Squad creation + invite system
-- [ ] Problem sharing feed + link scraper
-- [ ] Mark as solved + points engine
-- [ ] Live leaderboard (Redis)
-- [ ] 1v1 Duels (Socket.io)
-- [ ] Discussion threads
-- [ ] Analytics dashboard (radar chart + heatmap)
-- [ ] Weekly digest emails
-- [ ] Public squad discovery page
+### Client
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
 
 ---
 
-## 👥 Team
+## 🤝 Contributing
 
-| Name | Role |
-|---|---|
-| You | Frontend, UI/UX |
-| Antigravity | Backend, Infrastructure |
+1. Fork the repo
+2. Create your branch: `git checkout -b feat/my-feature`
+3. Commit your changes: `git commit -m 'feat: add my feature'`
+4. Push to the branch: `git push origin feat/my-feature`
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-MIT
+MIT © [Swayam Garg](https://github.com/Swayam7Garg)

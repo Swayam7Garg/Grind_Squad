@@ -1,0 +1,103 @@
+.container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(26, 25, 27, 0.92);
+  backdrop-filter: blur(16px);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1rem 1rem 0.875rem;
+  min-width: 280px;
+  max-width: 340px;
+  overflow: hidden;
+  pointer-events: all;
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,156,0.15);
+}
+
+.toastGlow {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon), transparent);
+}
+
+.toastIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.toastBody { flex: 1; min-width: 0; }
+
+.toastTitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--neon);
+  margin-bottom: 0.2rem;
+}
+.toastProblem {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--on-surface);
+  margin-bottom: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toastMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.points {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--neon);
+}
+.streak {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--secondary);
+  font-weight: 500;
+}
+.multiplier {
+  margin-top: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.dismiss {
+  flex-shrink: 0;
+  color: var(--on-surface-variant);
+  padding: 0.1rem;
+  border-radius: 2px;
+  transition: var(--transition);
+  opacity: 0.6;
+}
+.dismiss:hover { opacity: 1; color: var(--on-surface); }
+
+@keyframes slideIn {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);   opacity: 1; }
+}

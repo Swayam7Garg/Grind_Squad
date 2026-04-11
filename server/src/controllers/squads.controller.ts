@@ -274,8 +274,126 @@ export async function leaveSquad(
             where: { userId_squadId: { userId, squadId } },
         });
 
-        res.status(204).send();
+        res.status(200).json({ message: "Left squad successfully" });
     } catch (err) {
         next(err);
     }
 }
+
+/**
+ * DELETE /api/squads/:squadId
+ * Delete a squad entirely. Only the OWNER may do this.
+ * Cascades to members, problems, duels via Prisma onDelete.
+ */
+export async function deleteSquad(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> {
+    try {
+        const { squadId } = req.params;
+        const member = req.squadMember; // set by squadGuard
+
+        if (member.role !== SquadRole.OWNER) {
+            throw new AppError(
+                "Only the squad owner can delete the squad.",
+                403,
+                "FORBIDDEN"
+            );
+        }
+
+        // Delete duels (no cascade from Squad) and members, then the squad itself.
+        // SquadProblems cascade automatically via onDelete:Cascade on the Squad relation.
+        await prisma.$transaction(async (tx) => {
+            await tx.duel.deleteMany({ where: { squadId } });
+            await tx.squadMember.deleteMany({ where: { squadId } });
+            await tx.squad.delete({ where: { id: squadId } });
+        });
+
+        res.status(200).json({ message: "Squad deleted successfully." });
+    } catch (err) {
+        next(err);
+    }
+}
+
+/**
+ * POST /api/squads/:squadId/members
+ * Add a member to a squad. OWNER/ADMIN only.
+ */
+export async function addMember(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> {
+    try {
+        const { squadId } = req.params;
+        const { userId: targetUserId } = req.body as { userId: string };
+        const member = req.squadMember; // from squadGuard
+
+        if (member.role !== SquadRole.OWNER && member.role !== SquadRole.ADMIN) {
+            throw new AppError("Only squad leaders can add members.", 403, "FORBIDDEN");
+        }
+
+        if (!targetUserId) {
+            throw new AppError("userId is required", 400, "VALIDATION_ERROR");
+        }
+
+        // Check if already a member
+        const existing = await prisma.squadMember.findUnique({
+            where: { userId_squadId: { userId: targetUserId, squadId } },
+        });
+
+        if (existing) {
+            throw new AppError("User is already a member", 409, "ALREADY_MEMBER");
+        }
+
+        await prisma.squadMember.create({
+            data: { userId: targetUserId, squadId, role: SquadRole.MEMBER },
+        });
+
+        res.status(201).json({ message: "Member added successfully" });
+    } catch (err) {
+        next(err);
+    }
+}
+
+/**
+ * DELETE /api/squads/:squadId/members/:memberUserId
+ * Remove a member from a squad. OWNER/ADMIN only.
+ */
+export async function removeMember(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> {
+    try {
+        const { squadId, memberUserId } = req.params;
+        const member = req.squadMember; // from squadGuard
+
+        if (member.role !== SquadRole.OWNER && member.role !== SquadRole.ADMIN) {
+            throw new AppError("Only squad leaders can remove members.", 403, "FORBIDDEN");
+        }
+
+        const targetMember = await prisma.squadMember.findUnique({
+            where: { userId_squadId: { userId: memberUserId, squadId } },
+        });
+
+        if (!targetMember) {
+            throw new AppError("Member not found in squad", 404, "NOT_FOUND");
+        }
+
+        if (targetMember.role === SquadRole.OWNER) {
+            throw new AppError("Owner cannot be removed. Transfer ownership or delete squad.", 403, "FORBIDDEN");
+        }
+
+        await prisma.squadMember.delete({
+            where: { userId_squadId: { userId: memberUserId, squadId } },
+        });
+
+        res.status(200).json({ message: "Member removed successfully" });
+    } catch (err) {
+        next(err);
+    }
+}
+
+

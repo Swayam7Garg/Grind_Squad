@@ -1,0 +1,192 @@
+.page {
+  flex: 1;
+  padding: 2rem;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.6rem;
+  color: var(--on-surface);
+  margin-top: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: var(--on-surface-variant);
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--on-surface-variant);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Podium ── */
+.podium {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.podiumCard {
+  flex: 1;
+  max-width: 180px;
+  background: var(--surface-container);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+
+.podiumCard:hover { transform: translateY(-2px); }
+
+.podiumFirst {
+  border-color: rgba(0,255,156,0.25);
+  background: linear-gradient(135deg, rgba(0,255,156,0.05), var(--surface-container));
+  box-shadow: 0 0 30px rgba(0,255,156,0.06);
+}
+
+.podiumMedal { font-size: 1.5rem; margin-bottom: 0.75rem; }
+
+.podiumAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: var(--surface-container-high);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--on-surface);
+  margin: 0 auto 0.75rem;
+  position: relative;
+}
+
+.podiumGlow {
+  position: absolute;
+  inset: -4px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,156,0.4);
+  box-shadow: 0 0 16px rgba(0,255,156,0.2);
+}
+
+.podiumName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.podiumPts {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--neon);
+}
+
+.podiumStreak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  color: var(--secondary);
+  margin-top: 0.3rem;
+}
+
+/* ── Rank list ── */
+.rankList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.rankRow {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--surface-container);
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.rankRow:hover { border-color: var(--border); }
+
+.rankNum {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.rankAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: var(--surface-container-high);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  flex-shrink: 0;
+}
+
+.rankName {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+
+.rankStreak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+.rankPts {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--neon);
+  flex-shrink: 0;
+}
